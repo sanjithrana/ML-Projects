@@ -1,1 +1,4 @@
-git 
+pandas
+seaborn
+numpy
+-e .
