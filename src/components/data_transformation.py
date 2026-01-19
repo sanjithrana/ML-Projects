@@ -1,0 +1,79 @@
+#
+
+import sys
+from dataclasses import dataclass
+import numpy
+import pandas as pd  
+from sklearn.preprocessing import StandardScaler,OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.pipeline import Pipeline
+from src.logger import logging
+from src.exception import CustomException
+import os
+
+@dataclass
+class DataTransformationConfig:
+    prepocessor_obj_file_path = os.path.join("artifacts","prepocesssor.pkl")
+
+class DataTransformation:
+    def __init__(self):
+        self.data_transformer_config= DataTransformation()
+    
+    def get_data_transformer_object(self):
+        try:
+            numerical_columns = ['writing_score','reading_score']
+            categorical_columns = [
+                "gender",
+                "race_ethnicity",
+                "parental_level_of_education",
+                "lunch",
+                "test_preparation_course"
+            ]
+            num_pipeline = Pipeline(
+                steps=[
+                    ("imputer",SimpleImputer(strategy="median")),
+                    ("scaler",StandardScaler())
+                ]
+            )
+            cat_pipeline = Pipeline(
+                steps=[
+                    ('imputer',SimpleImputer(strategy = 'most_frequent')),
+                    ("onehotencode",OneHotEncoder()),
+                    ("scaler",StandardScaler())
+                ]
+            )
+            logging.info(f"This is the data transformation for numerics: {numerical_columns}")
+            logging.info(f"This is the data transformation for catogerical: {categorical_columns}")
+
+            prepocessor = ColumnTransformer(
+                [
+                    ("numerical_pipeline",num_pipeline,numerical_columns),
+                    ("catogerical_pipeline",cat_pipeline,categorical_columns)
+                ]
+            )
+            
+
+            return prepocessor
+
+
+
+        except Exception as e:
+            return CustomException(e,sys)
+        
+    def initiate_data_transformation(self,train_path,test_path):
+        try:
+            train_df = pd.read_csv(train_path)
+            test_df = pd.read_csv(test_path)
+            logging.info("Read train and test data")
+            logging.info("obtaining the pre processor")
+
+            preprocessing_obj = self.get_data_transformer_object()
+
+            traget_col_name = "math_score"
+            numerical_col = ['writing_score','reading_score']
+            input_feature_train_df = train_df.drop(columns=[traget_col_name],axis=1)
+        except:
+            pass
+
+
