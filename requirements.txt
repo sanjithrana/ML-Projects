@@ -3,3 +3,4 @@ seaborn
 numpy
 -e .
 ipykernal
+catboost
