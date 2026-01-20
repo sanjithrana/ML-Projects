@@ -2,7 +2,7 @@
 
 import sys
 from dataclasses import dataclass
-import numpy
+import numpy as np
 import pandas as pd  
 from sklearn.preprocessing import StandardScaler,OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -46,18 +46,14 @@ class DataTransformation:
             logging.info(f"This is the data transformation for numerics: {numerical_columns}")
             logging.info(f"This is the data transformation for catogerical: {categorical_columns}")
 
-            prepocessor = ColumnTransformer(
+            preprocessor = ColumnTransformer(
                 [
                     ("numerical_pipeline",num_pipeline,numerical_columns),
                     ("catogerical_pipeline",cat_pipeline,categorical_columns)
                 ]
             )
-            save_object(
-                file_path=self.data_transformer_config.prepocessor_obj_file_path,
-                obj=prepocessor
-            )
-
-            return prepocessor
+            
+            return preprocessor
 
         except Exception as e:
             return CustomException(e,sys)
@@ -73,7 +69,37 @@ class DataTransformation:
 
             traget_col_name = "math_score"
             numerical_col = ['writing_score','reading_score']
+
             input_feature_train_df = train_df.drop(columns=[traget_col_name],axis=1)
+            traget_feature_train_df = train_df[traget_col_name]
+
+            input_feature_test_df = test_df.drop(columns=[traget_col_name],axis=1)
+            traget_feature_test_df = test_df[traget_col_name]
+
+            logging.info(f"Applying the preprocessor obj on training dataframe and testing dataframe")
+
+            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
+            input_feature_test_arr = preprocessing_obj.fit_transform(input_feature_test_df)
+
+            train_arr = np.c_[
+                input_feature_train_arr,np.array(traget_feature_train_df)
+
+            ] 
+            test_arr = np.c_[
+                input_feature_train_arr,np.array(traget_feature_test_df)
+
+            ]
+            logging.info("Saved preprocessor obj.")
+            save_object(
+                file_path=self.data_transformer_config.prepocessor_obj_file_path,
+                obj=preprocessing_obj
+            )
+            return (
+                train_arr,
+                test_arr,
+                self.data_transformer_config.prepocessor_obj_file_path,
+            )
+
         except Exception as e:
             raise CustomException(e,sys)
             

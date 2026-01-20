@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+import sys
+from sklearn.model_selection import train_test_split
+
+from catboost import CatBoostRegressor
+from sklearn.ensemble import RandomForestRegressor,GradientBoostingRegressor,AdaBoostRegressor
+from sklearn.linear_model import LinearRegressor,Lasso,Ridge
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import r2_score,mean_squared_error
+from src.exception import CustomException
+from src.logger import logging
+from xgboost import XGBRegressor
+import os
+from src.utils import save_object,evaluate_model
+from src.components.data_transformation import DataTransformation
+from src.components.data_transformation import DataTransformationConfig
+from dataclasses import dataclass
+
+@dataclass
+class ModelTrainingConfig:
+    trained_model_file= os.path.join("artifacts","model.pkl")
+
+class ModelTrainer:
+    def __init__(self):
+        self.model_trainer_config = ModelTrainingConfig()
+    def initiate_model_trainer(self,train_array,test_array):
+        try:
+            logging.info("spliting ,training,and test ")
+            x_train,y_train,x_test,y_test =(
+                train_array[:,:-1],
+                train_array[:,:-1],
+                test_array[:,:-1],
+                test_array[:,-1]
+            )
+
+            models = {
+                "random forest": RandomForestRegressor(),
+                "Decision Tree": DecisionTreeRegressor(),
+                "Gradient Boosting":GradientBoostingRegressor(),
+                "K-Neightbors Reg": KNeighborsRegressor(),
+                "XGBoosting Reg": XGBRegressor(),
+                "CatBoost Reg": CatBoostRegressor(),
+                "AdaBoost Reg": AdaBoostRegressor(),
+            }
+
+            model_report : dict = evaluate_model(x_train = x_train,y_train = y_train,x_test = x_test,y_test= y_test,models= models)
+
+            best_model_score = max(sorted(model_report.values()))
+
+            best_model_name = list(model_report.keys())[
+                list(model_report.values()).index(best_model_score)
+            ]
+            best_model = models[best_model_name]
+
+            if best_model_name<0.6:
+                raise CustomException("no best model found")
+            
+            logging.info("Best found model on both training and testing dataset")
+
+            save_object(
+                file_path=self.model_trainer_config.trained_model_file,
+                obj=best_model
+            )
+
+            predicted = best_model.predict(x_test)
+
+            r2_scored = r2_score(y_test,predicted)
+            return r2_scored
+        except Exception as e:
+            return CustomException(e,sys)
