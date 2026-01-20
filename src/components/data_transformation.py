@@ -11,14 +11,14 @@ from sklearn.pipeline import Pipeline
 from src.logger import logging
 from src.exception import CustomException
 import os
-
+from src.utils import save_object
 @dataclass
 class DataTransformationConfig:
     prepocessor_obj_file_path = os.path.join("artifacts","prepocesssor.pkl")
 
 class DataTransformation:
     def __init__(self):
-        self.data_transformer_config= DataTransformation()
+        self.data_transformer_config= DataTransformationConfig()
     
     def get_data_transformer_object(self):
         try:
@@ -52,11 +52,12 @@ class DataTransformation:
                     ("catogerical_pipeline",cat_pipeline,categorical_columns)
                 ]
             )
-            
+            save_object(
+                file_path=self.data_transformer_config.prepocessor_obj_file_path,
+                obj=prepocessor
+            )
 
             return prepocessor
-
-
 
         except Exception as e:
             return CustomException(e,sys)
@@ -73,7 +74,8 @@ class DataTransformation:
             traget_col_name = "math_score"
             numerical_col = ['writing_score','reading_score']
             input_feature_train_df = train_df.drop(columns=[traget_col_name],axis=1)
-        except:
-            pass
+        except Exception as e:
+            raise CustomException(e,sys)
+            
 
 

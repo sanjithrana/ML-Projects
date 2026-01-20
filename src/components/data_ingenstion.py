@@ -6,6 +6,8 @@ import pandas as pd
 import os
 import sys
 from sklearn.model_selection import train_test_split
+from src.components.data_transformation import DataTransformation,DataTransformationConfig
+
 
 @dataclass #because inside a class to define the class variable we use __init__
            #but with the help of this we can directly define the class variable
@@ -45,4 +47,7 @@ class DataIngenstion:
 
 if __name__ == "__main__":#initiate
     obj = DataIngenstion()
-    obj.initiate_ingenstion_data()
+    train_data,test_data = obj.initiate_ingenstion_data()
+
+    data_transformation = DataTransformation()
+    data_transformation.initiate_data_transformation(train_data,test_data)
