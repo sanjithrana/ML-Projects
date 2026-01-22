@@ -18,23 +18,24 @@ def save_object(file_path,obj):
     except Exception as e:
         raise CustomException(e,sys)
     
-def evaluate_model(x_train,y_train,y_test,x_test, models):
+
+from src.exception import CustomException
+from src.logger import logging
+from sklearn.metrics import r2_score
+import sys
+
+def evaluate_model(x_train, y_train, x_test, y_test, models: dict):
     try:
         report = {}
 
-        for i in range(len(list(models))):
-            models = list(models.values())[i]
+        for model_name, model in models.items():
+            model.fit(x_train, y_train)
+            y_pred = model.predict(x_test)
+            
+            score = r2_score(y_test, y_pred)
+            report[model_name] = score
 
-            models.fit(x_train,y_train)
-
-            y_train_pred = models.predict(x_train)
-            y_test_pred = models.predict(y_test)
-
-            train_model_score = r2_score(y_train,y_train_pred)
-            test_model_score = r2_score(y_test,y_test_pred)
-
-            report[list(models.keys())[i]] = train_model_score
         return report
+
     except Exception as e:
-        return CustomException(e,sys)
-    
+        raise CustomException(e, sys)

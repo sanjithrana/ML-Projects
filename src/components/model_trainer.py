@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from catboost import CatBoostRegressor
 from sklearn.ensemble import RandomForestRegressor,GradientBoostingRegressor,AdaBoostRegressor
-from sklearn.linear_model import LinearRegressor,Lasso,Ridge
+from sklearn.linear_model import LinearRegression,Lasso,Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import r2_score,mean_squared_error
@@ -30,7 +30,7 @@ class ModelTrainer:
             logging.info("spliting ,training,and test ")
             x_train,y_train,x_test,y_test =(
                 train_array[:,:-1],
-                train_array[:,:-1],
+                train_array[:,-1],
                 test_array[:,:-1],
                 test_array[:,-1]
             )
@@ -54,7 +54,7 @@ class ModelTrainer:
             ]
             best_model = models[best_model_name]
 
-            if best_model_name<0.6:
+            if best_model_score<0.6:
                 raise CustomException("no best model found")
             
             logging.info("Best found model on both training and testing dataset")
@@ -69,4 +69,5 @@ class ModelTrainer:
             r2_scored = r2_score(y_test,predicted)
             return r2_scored
         except Exception as e:
-            return CustomException(e,sys)
+            raise CustomException(e,sys)
+        

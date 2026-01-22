@@ -33,14 +33,14 @@ class DataTransformation:
             num_pipeline = Pipeline(
                 steps=[
                     ("imputer",SimpleImputer(strategy="median")),
-                    ("scaler",StandardScaler())
+                    ("scaler",StandardScaler(with_mean=False))
                 ]
             )
             cat_pipeline = Pipeline(
                 steps=[
                     ('imputer',SimpleImputer(strategy = 'most_frequent')),
-                    ("onehotencode",OneHotEncoder()),
-                    ("scaler",StandardScaler())
+                    ("onehotencode",OneHotEncoder(sparse_output=False))
+                    
                 ]
             )
             logging.info(f"This is the data transformation for numerics: {numerical_columns}")
@@ -86,7 +86,7 @@ class DataTransformation:
 
             ] 
             test_arr = np.c_[
-                input_feature_train_arr,np.array(traget_feature_test_df)
+                input_feature_test_arr,np.array(traget_feature_test_df)
 
             ]
             logging.info("Saved preprocessor obj.")
