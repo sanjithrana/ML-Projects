@@ -14,7 +14,7 @@ import os
 from src.utils import save_object
 @dataclass
 class DataTransformationConfig:
-    prepocessor_obj_file_path = os.path.join("artifacts","prepocesssor.pkl")
+    prepocessor_obj_file_path = os.path.join("artifacts","preprocessor.pkl")
 
 class DataTransformation:
     def __init__(self):
@@ -39,7 +39,7 @@ class DataTransformation:
             cat_pipeline = Pipeline(
                 steps=[
                     ('imputer',SimpleImputer(strategy = 'most_frequent')),
-                    ("onehotencode",OneHotEncoder(sparse_output=False))
+                    ("onehotencode",OneHotEncoder(sparse=False))
                     
                 ]
             )
@@ -56,7 +56,7 @@ class DataTransformation:
             return preprocessor
 
         except Exception as e:
-            return CustomException(e,sys)
+            raise CustomException(e,sys)
         
     def initiate_data_transformation(self,train_path,test_path):
         try:
